@@ -213,24 +213,43 @@ The application will be available at:
 
 ## Deployment
 
-### Frontend (Netlify/Vercel)
-1. Build the client: `cd client && npm run build`
-2. Deploy the `build` folder to your hosting service
-3. Update API URLs in the build
+### Quick Start Deployment (Recommended)
 
-### Backend (Heroku/Railway/Render)
-1. Set environment variables on your hosting platform
-2. Update MongoDB URI to your cloud database
-3. Deploy the server folder
+**Frontend**: Vercel | **Backend**: Render | **Database**: MongoDB Atlas
+
+📖 **[Complete Deployment Guide](./DEPLOYMENT.md)** - Step-by-step instructions
+
+### Quick Commands
+
+1. **Setup MongoDB Atlas** (free tier)
+2. **Deploy Backend to Render**:
+   - Connect GitHub repository
+   - Root directory: `server`
+   - Set environment variables
+3. **Deploy Frontend to Vercel**:
+   - Connect GitHub repository  
+   - Root directory: `client`
+   - Set API URL environment variable
 
 ### Environment Variables for Production
+
+**Backend (Render)**:
 ```env
 NODE_ENV=production
-PORT=5000
-MONGODB_URI=your-production-mongodb-uri
-JWT_SECRET=your-super-secure-production-secret
-CLIENT_URL=https://your-frontend-domain.com
+MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/mern-portfolio
+JWT_SECRET=your-super-secure-32-char-secret
+CLIENT_URL=https://your-vercel-app.vercel.app
 ```
+
+**Frontend (Vercel)**:
+```env
+REACT_APP_API_URL=https://your-render-service.onrender.com/api
+```
+
+### Production URLs
+- **Frontend**: `https://your-app.vercel.app`
+- **Admin Panel**: `https://your-app.vercel.app/admin/login`
+- **Backend API**: `https://your-api.onrender.com`
 
 ## Contributing
 

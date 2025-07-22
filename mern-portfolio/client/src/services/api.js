@@ -1,6 +1,11 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+// API Base URL - automatically detects environment
+// IMPORTANT: Replace 'your-render-service-name' with your actual Render service URL
+const API_BASE_URL = process.env.REACT_APP_API_URL || 
+  (process.env.NODE_ENV === 'production' 
+    ? 'https://your-render-service-name.onrender.com/api'
+    : 'http://localhost:5000/api');
 
 // Create axios instance
 const api = axios.create({
@@ -8,6 +13,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 10000, // 10 second timeout
 });
 
 // Add auth token to requests
@@ -19,15 +25,25 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle auth errors
+// Handle auth errors and network issues
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/admin/login';
+      if (window.location.pathname.startsWith('/admin')) {
+        window.location.href = '/admin/login';
+      }
     }
+    
+    // Handle network errors
+    if (error.code === 'ECONNABORTED') {
+      console.error('Request timeout');
+    } else if (!error.response) {
+      console.error('Network error - server may be unavailable');
+    }
+    
     return Promise.reject(error);
   }
 );
