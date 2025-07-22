@@ -89,6 +89,8 @@ mern-portfolio/
 └── README.md
 ```
 
+## Pitch Deck Link##
+https://www.canva.com/design/DAGmN7ahUyY/WZHs6TO72s8euTbhL-F4fw/edit?utm_content=DAGmN7ahUyY&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
 ## Installation & Setup
 
 ### Prerequisites
