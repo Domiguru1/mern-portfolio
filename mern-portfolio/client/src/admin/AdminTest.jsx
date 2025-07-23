@@ -36,6 +36,9 @@ const AdminTest = () => {
           <Link to="/admin/contacts" style={{ padding: '8px 16px', background: '#ffc107', color: 'black', textDecoration: 'none', borderRadius: '4px' }}>
             Contacts
           </Link>
+          <Link to="/admin/api-test" style={{ padding: '8px 16px', background: '#e83e8c', color: 'white', textDecoration: 'none', borderRadius: '4px' }}>
+            API Test
+          </Link>
           <Link to="/" style={{ padding: '8px 16px', background: '#6c757d', color: 'white', textDecoration: 'none', borderRadius: '4px' }}>
             Home
           </Link>

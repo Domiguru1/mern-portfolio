@@ -12,6 +12,7 @@ import AdminDashboard from './admin/AdminDashboard';
 import AdminProjects from './admin/AdminProjects';
 import AdminContacts from './admin/AdminContacts';
 import AdminTest from './admin/AdminTest';
+import AdminAPITest from './admin/AdminAPITest';
 import ProtectedRoute from './admin/ProtectedRoute';
 
 function App() {
@@ -21,6 +22,11 @@ function App() {
         <Routes>
           {/* Admin Routes - These need to be first to avoid conflicts */}
           <Route path="/admin/test" element={<AdminTest />} />
+          <Route path="/admin/api-test" element={
+            <ProtectedRoute>
+              <AdminAPITest />
+            </ProtectedRoute>
+          } />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route 
             path="/admin/dashboard" 

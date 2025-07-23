@@ -21,11 +21,14 @@ const AdminProjects = () => {
   const [projects, setProjects] = useState([]);
   const [filteredProjects, setFilteredProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [submitLoading, setSubmitLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [showModal, setShowModal] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -75,27 +78,78 @@ const AdminProjects = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setSubmitLoading(true);
+    setError('');
+    setSuccess('');
+    
+    // Client-side validation
+    if (!formData.title.trim()) {
+      setError('Title is required');
+      setSubmitLoading(false);
+      return;
+    }
+    
+    if (!formData.description.trim()) {
+      setError('Description is required');
+      setSubmitLoading(false);
+      return;
+    }
+    
+    if (!formData.shortDescription.trim()) {
+      setError('Short description is required');
+      setSubmitLoading(false);
+      return;
+    }
+    
+    if (!formData.technologies.trim()) {
+      setError('Technologies are required');
+      setSubmitLoading(false);
+      return;
+    }
     
     const projectData = {
       ...formData,
-      technologies: formData.technologies.split(',').map(tech => tech.trim())
+      technologies: formData.technologies.split(',').map(tech => tech.trim()).filter(tech => tech.length > 0),
+      // Ensure we have a default image if none provided
+      image: formData.image.trim() || 'https://via.placeholder.com/400x250/667eea/ffffff?text=Project+Image'
     };
+    
+    // Validate technologies array
+    if (projectData.technologies.length === 0) {
+      setError('At least one technology is required');
+      setSubmitLoading(false);
+      return;
+    }
 
     try {
+      console.log('Submitting project data:', projectData);
+      
       if (editingProject) {
         await adminAPI.updateProject(editingProject._id, projectData);
+        setSuccess('Project updated successfully!');
       } else {
         await adminAPI.createProject(projectData);
+        setSuccess('Project created successfully!');
       }
       
       await fetchProjects();
       resetForm();
-      setShowModal(false);
+      
+      // Close modal after a short delay to show success message
+      setTimeout(() => {
+        setShowModal(false);
+        setSuccess('');
+      }, 1500);
+      
     } catch (error) {
       console.error('Error saving project:', error);
+      const errorMessage = error.response?.data?.details || 
+                          error.response?.data?.message || 
+                          error.message || 
+                          'Failed to save project';
+      setError(errorMessage);
     } finally {
-      setLoading(false);
+      setSubmitLoading(false);
     }
   };
 
@@ -141,6 +195,8 @@ const AdminProjects = () => {
       status: 'active'
     });
     setEditingProject(null);
+    setError('');
+    setSuccess('');
   };
 
   const handleLogout = () => {
@@ -348,13 +404,38 @@ const AdminProjects = () => {
               Projects
             </h1>
           </div>
-          <button 
-            onClick={() => setShowModal(true)}
-            className="btn btn-primary"
-            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-          >
-            <FaPlus /> Add Project
-          </button>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button 
+              onClick={() => setShowModal(true)}
+              className="btn btn-primary"
+              style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
+              <FaPlus /> Add Project
+            </button>
+            <button 
+              onClick={() => {
+                console.log('Testing project creation...');
+                setShowModal(true);
+                // Pre-fill with test data
+                setFormData({
+                  title: 'Test Project',
+                  description: 'This is a test project to verify the form is working correctly.',
+                  shortDescription: 'A test project for debugging',
+                  image: 'https://via.placeholder.com/400x250/667eea/ffffff?text=Test+Project',
+                  technologies: 'React, Node.js, MongoDB',
+                  githubUrl: 'https://github.com/test/repo',
+                  liveUrl: 'https://test-project.com',
+                  category: 'web-development',
+                  featured: false,
+                  status: 'active'
+                });
+              }}
+              className="btn btn-secondary"
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.875rem' }}
+            >
+              🧪 Test Add
+            </button>
+          </div>
         </header>
 
         <main style={{ padding: '24px' }}>
@@ -541,6 +622,18 @@ const AdminProjects = () => {
               {editingProject ? 'Edit Project' : 'Add New Project'}
             </h2>
             
+            {error && (
+              <div className="alert alert-error" style={{ marginBottom: '20px' }}>
+                {error}
+              </div>
+            )}
+            
+            {success && (
+              <div className="alert alert-success" style={{ marginBottom: '20px' }}>
+                {success}
+              </div>
+            )}
+            
             <form onSubmit={handleSubmit}>
               <div className="grid grid-2" style={{ gap: '16px' }}>
                 <div className="form-group">
@@ -595,16 +688,19 @@ const AdminProjects = () => {
                 />
               </div>
               
-              <div className="form-group">
-                <label className="form-label">Image URL</label>
-                <input
-                  type="url"
-                  value={formData.image}
-                  onChange={(e) => setFormData({...formData, image: e.target.value})}
-                  className="form-input"
-                  placeholder="https://example.com/image.jpg"
-                />
-              </div>
+                              <div className="form-group">
+                  <label className="form-label">Image URL</label>
+                  <input
+                    type="url"
+                    value={formData.image}
+                    onChange={(e) => setFormData({...formData, image: e.target.value})}
+                    className="form-input"
+                    placeholder="https://example.com/image.jpg (optional - will use placeholder if empty)"
+                  />
+                  <small style={{ color: '#64748b', fontSize: '0.875rem' }}>
+                    Leave empty to use default placeholder image
+                  </small>
+                </div>
               
               <div className="form-group">
                 <label className="form-label">Technologies (comma-separated) *</label>
@@ -666,10 +762,10 @@ const AdminProjects = () => {
                 </div>
               </div>
               
-              <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-                <button type="submit" className="btn btn-primary" disabled={loading}>
-                  {loading ? 'Saving...' : (editingProject ? 'Update' : 'Create')}
-                </button>
+                              <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+                  <button type="submit" className="btn btn-primary" disabled={submitLoading}>
+                    {submitLoading ? 'Saving...' : (editingProject ? 'Update' : 'Create')}
+                  </button>
                 <button 
                   type="button" 
                   onClick={() => {

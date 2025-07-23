@@ -84,11 +84,54 @@ const getAdminProjects = async (req, res) => {
 // Create project
 const createProject = async (req, res) => {
   try {
-    const project = new Project(req.body);
-    await project.save();
-    res.status(201).json(project);
+    console.log('Creating project with data:', req.body);
+    
+    // Validate required fields
+    const { title, description, shortDescription, technologies } = req.body;
+    
+    if (!title || !description || !shortDescription) {
+      return res.status(400).json({ 
+        message: 'Missing required fields', 
+        details: 'Title, description, and short description are required' 
+      });
+    }
+    
+    if (!technologies || technologies.length === 0) {
+      return res.status(400).json({ 
+        message: 'Technologies are required', 
+        details: 'At least one technology must be specified' 
+      });
+    }
+    
+    // Create project with validated data
+    const projectData = {
+      ...req.body,
+      // Ensure image has a default if empty
+      image: req.body.image || 'https://via.placeholder.com/400x250/667eea/ffffff?text=Project+Image'
+    };
+    
+    const project = new Project(projectData);
+    const savedProject = await project.save();
+    
+    console.log('Project created successfully:', savedProject._id);
+    res.status(201).json(savedProject);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error('Error creating project:', error);
+    
+    // Handle validation errors
+    if (error.name === 'ValidationError') {
+      const validationErrors = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({ 
+        message: 'Validation failed', 
+        details: validationErrors.join(', '),
+        errors: error.errors
+      });
+    }
+    
+    res.status(500).json({ 
+      message: 'Server error while creating project', 
+      error: error.message 
+    });
   }
 };
 

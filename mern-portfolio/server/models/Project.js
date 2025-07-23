@@ -3,21 +3,23 @@ const mongoose = require('mongoose');
 const projectSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: true,
-    trim: true
+    required: [true, 'Title is required'],
+    trim: true,
+    maxlength: [100, 'Title cannot exceed 100 characters']
   },
   description: {
     type: String,
-    required: true
+    required: [true, 'Description is required']
   },
   shortDescription: {
     type: String,
-    required: true,
-    maxlength: 200
+    required: [true, 'Short description is required'],
+    maxlength: [200, 'Short description cannot exceed 200 characters']
   },
   image: {
     type: String,
-    required: true
+    default: 'https://via.placeholder.com/400x250/667eea/ffffff?text=Project+Image',
+    trim: true
   },
   technologies: [{
     type: String,
@@ -25,11 +27,23 @@ const projectSchema = new mongoose.Schema({
   }],
   githubUrl: {
     type: String,
-    trim: true
+    trim: true,
+    validate: {
+      validator: function(v) {
+        return !v || /^https?:\/\/.+/.test(v);
+      },
+      message: 'GitHub URL must be a valid URL'
+    }
   },
   liveUrl: {
     type: String,
-    trim: true
+    trim: true,
+    validate: {
+      validator: function(v) {
+        return !v || /^https?:\/\/.+/.test(v);
+      },
+      message: 'Live URL must be a valid URL'
+    }
   },
   category: {
     type: String,
