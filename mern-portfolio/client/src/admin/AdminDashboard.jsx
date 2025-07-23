@@ -25,12 +25,37 @@ const AdminDashboard = () => {
     respondedMessages: 0
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const user = authHelpers.getUser();
 
+  // Add test mode to bypass API calls
+  const isTestMode = window.location.search.includes('test=true');
+
   useEffect(() => {
+    console.log('AdminDashboard mounted');
+    console.log('User:', user);
+    console.log('Test mode:', isTestMode);
+    
     const fetchStats = async () => {
+      if (isTestMode) {
+        // Use mock data for testing
+        setStats({
+          totalProjects: 5,
+          activeProjects: 3,
+          featuredProjects: 2
+        });
+        setContactStats({
+          totalMessages: 8,
+          newMessages: 3,
+          readMessages: 3,
+          respondedMessages: 2
+        });
+        setLoading(false);
+        return;
+      }
+
       try {
         const [projectStats, messageStats] = await Promise.all([
           adminAPI.getDashboardStats(),
@@ -40,18 +65,37 @@ const AdminDashboard = () => {
         setContactStats(messageStats.data);
       } catch (error) {
         console.error('Error fetching stats:', error);
+        setError('Failed to load dashboard data. ' + (error.response?.data?.message || error.message));
       } finally {
         setLoading(false);
       }
     };
 
     fetchStats();
-  }, []);
+  }, [user, isTestMode]);
 
   const handleLogout = () => {
     authHelpers.removeAuthToken();
     navigate('/admin/login');
   };
+
+  // Show error state
+  if (error) {
+    return (
+      <div style={{ padding: '40px', textAlign: 'center' }}>
+        <h2>Error Loading Dashboard</h2>
+        <p style={{ color: 'red', marginBottom: '20px' }}>{error}</p>
+        <div>
+          <button onClick={() => window.location.reload()} className="btn btn-primary" style={{ marginRight: '10px' }}>
+            Retry
+          </button>
+          <Link to="/admin/test" className="btn btn-secondary">
+            Go to Test Page
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const Sidebar = () => (
     <div style={{
@@ -77,6 +121,17 @@ const AdminDashboard = () => {
         }}>
           Admin Panel
         </h2>
+        {isTestMode && (
+          <span style={{ 
+            background: '#ffc107', 
+            color: '#000', 
+            padding: '2px 8px', 
+            borderRadius: '4px', 
+            fontSize: '0.75rem' 
+          }}>
+            TEST MODE
+          </span>
+        )}
       </div>
       
       <nav>
@@ -179,6 +234,28 @@ const AdminDashboard = () => {
         >
           <FaEye /> View Site
         </Link>
+        <Link 
+          to="/admin/test" 
+          style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '12px', 
+            padding: '12px 20px', 
+            color: '#e2e8f0', 
+            textDecoration: 'none',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseOver={(e) => {
+            e.target.style.background = 'rgba(255, 255, 255, 0.1)';
+            e.target.style.color = 'white';
+          }}
+          onMouseOut={(e) => {
+            e.target.style.background = 'transparent';
+            e.target.style.color = '#e2e8f0';
+          }}
+        >
+          🧪 Test Page
+        </Link>
       </nav>
 
       <div style={{ position: 'absolute', bottom: '20px', left: '20px', right: '20px' }}>
@@ -189,7 +266,7 @@ const AdminDashboard = () => {
           marginBottom: '16px'
         }}>
           <p style={{ fontSize: '0.875rem', marginBottom: '4px' }}>Welcome back,</p>
-          <p style={{ fontWeight: '600' }}>{user?.username}</p>
+          <p style={{ fontWeight: '600' }}>{user?.username || 'Admin'}</p>
         </div>
         <button 
           onClick={handleLogout}
@@ -270,7 +347,7 @@ const AdminDashboard = () => {
               {sidebarOpen ? <FaTimes /> : <FaBars />}
             </button>
             <h1 style={{ fontSize: '1.8rem', fontWeight: '600', color: '#1e293b' }}>
-              Dashboard
+              Dashboard {isTestMode && <span style={{ color: '#ffc107' }}>(Test Mode)</span>}
             </h1>
           </div>
           <div style={{ display: 'flex', gap: '12px' }}>

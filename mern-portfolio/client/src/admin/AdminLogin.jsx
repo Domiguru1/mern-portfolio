@@ -32,14 +32,19 @@ const AdminLogin = () => {
     setError('');
 
     try {
+      console.log('Attempting login with:', { email: formData.email });
       const response = await adminAPI.login(formData);
+      console.log('Login response:', response.data);
+      
       const { token, user } = response.data;
       
       authHelpers.setAuthToken(token);
       authHelpers.setUser(user);
       
+      console.log('Login successful, navigating to dashboard');
       navigate('/admin/dashboard');
     } catch (error) {
+      console.error('Login error:', error);
       setError(error.response?.data?.message || 'Login failed');
     } finally {
       setLoading(false);

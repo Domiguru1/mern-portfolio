@@ -11,6 +11,7 @@ import AdminLogin from './admin/AdminLogin';
 import AdminDashboard from './admin/AdminDashboard';
 import AdminProjects from './admin/AdminProjects';
 import AdminContacts from './admin/AdminContacts';
+import AdminTest from './admin/AdminTest';
 import ProtectedRoute from './admin/ProtectedRoute';
 
 function App() {
@@ -18,7 +19,8 @@ function App() {
     <Router>
       <div className="App">
         <Routes>
-          {/* Admin Routes */}
+          {/* Admin Routes - These need to be first to avoid conflicts */}
+          <Route path="/admin/test" element={<AdminTest />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route 
             path="/admin/dashboard" 
@@ -45,18 +47,66 @@ function App() {
             } 
           />
           
-          {/* Public Routes */}
-          <Route path="/*" element={
+          {/* Public Routes with Layout */}
+          <Route path="/" element={
             <>
               <Navbar />
               <main>
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/portfolio" element={<Portfolio />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/project/:id" element={<ProjectDetail />} />
-                </Routes>
+                <Home />
+              </main>
+              <Footer />
+            </>
+          } />
+          
+          <Route path="/about" element={
+            <>
+              <Navbar />
+              <main>
+                <About />
+              </main>
+              <Footer />
+            </>
+          } />
+          
+          <Route path="/portfolio" element={
+            <>
+              <Navbar />
+              <main>
+                <Portfolio />
+              </main>
+              <Footer />
+            </>
+          } />
+          
+          <Route path="/contact" element={
+            <>
+              <Navbar />
+              <main>
+                <Contact />
+              </main>
+              <Footer />
+            </>
+          } />
+          
+          <Route path="/project/:id" element={
+            <>
+              <Navbar />
+              <main>
+                <ProjectDetail />
+              </main>
+              <Footer />
+            </>
+          } />
+          
+          {/* 404 Route */}
+          <Route path="*" element={
+            <>
+              <Navbar />
+              <main>
+                <div style={{ padding: '100px 20px', textAlign: 'center' }}>
+                  <h2>404 - Page Not Found</h2>
+                  <p>The page you're looking for doesn't exist.</p>
+                </div>
               </main>
               <Footer />
             </>

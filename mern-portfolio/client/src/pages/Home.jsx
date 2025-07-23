@@ -46,6 +46,9 @@ const Home = () => {
                 <Link to="/contact" className="btn btn-secondary">
                   Get In Touch
                 </Link>
+                <Link to="/admin/test" className="btn" style={{ background: '#ffc107', color: '#000' }}>
+                  Admin Test
+                </Link>
               </div>
             </div>
             <div className="hero-image">
